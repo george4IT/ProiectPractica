@@ -22,6 +22,16 @@ public class Main {
 		File file = new File("D:\\eclipse\\Workspace\\ExcelToCsvConvertor\\orar.xlsx");
 		FileInputStream fis = new FileInputStream(file);
 		processSchedule(fis);
+		//-george-
+		Func fx = new Func();
+		fx.saveListByHours(fis,0); //vezi functia in clasa Func pt mai multe detalii
+		Workbook wb = new XSSFWorkbook(fis);
+		CellRangeAddress LuniAnulILicenta = CellRangeAddress.valueOf("E7:K51");
+		Sheet thisSheet = wb.getSheetAt(0); // :)
+		Sheet newSheet = wb.createSheet("Procesate");
+		newSheet.addMergedRegionUnsafe(LuniAnulILicenta);
+		//currentsheet.addMergedRegion(LuniAnulILicenta); //-g asta creaza un merge, nu doresc asta, ci sa salveze regiunea intr-un Obiect sheet
+		//LuniAnulILicenta.toString();
 	}
 
 	private static void processSchedule(FileInputStream fis) throws IOException {
@@ -32,7 +42,7 @@ public class Main {
 			// Ignora primele 4 coloane(anul,spec,grupa,sgr)
 			int startColumn = 4;
 			// Incepe prelucrarea in functie de ziua in care esti (momentan doar ce e in paranteza)
-			startColumn += (1 - 1) * 7;
+			startColumn += (1 - 1) * 7; //-george- nu inteleg de ce te-ai complicat aici, din ce inteleg eu e ca +7 pt ziua urmatoare
 			// Seteaza lungimea maxima a 
 			int maxColumns = Math.min(sheet.getRow(0).getPhysicalNumberOfCells(),startColumn+ 7);
 			// i = 5 pt ca sari peste primele 5 randuri
@@ -42,10 +52,12 @@ public class Main {
 				// 
 				for (int j = startColumn; j < maxColumns; j++) {
 					Cell cell = row.getCell(j);
-					String cellValue = (cell != null) ? getCellValue(cell) : "";
+					//String cellValue = (cell != null) ? getCellValue(cell) : ""; 
+					String cellValue = (cell != null) ? cell.getStringCellValue() : "---";  
 					System.out.print(cellValue + "\t");
-				}
-				//Enter dupa fiecare linie scrisa
+			 //-george-ca Obs. am vazut ca nu marcheaza celulele goale cu ---, am incercat sa schimb si conditia if(cell==null), dar tot nu le marcheaza.
+			 //-george-cred ca ar trebui descoperita alta metoda in caz ca ne trebuie sa delimitam celulele goale.
+				}//Enter dupa fiecare linie scrisa
 				System.out.println();
 			}
 		} finally {
@@ -54,7 +66,7 @@ public class Main {
 		}
 
 	}
-
+//-george- getCellType e depreciat, propus sa se foloseasca in schimb metoda din pachet getStringCellValue() aplicata unei celule
 	//Functie care converteste orice tip de date din excel in string
 	private static String getCellValue(Cell cell) {
 		switch (cell.getCellType()) {
